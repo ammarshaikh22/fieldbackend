@@ -27,13 +27,12 @@ export const signup = async (req, res) => {
       }
 
       const existingAdmin = await User.findOne({
-        role: "admin",
-        companyName,
+        role: "admin"
       });
 
       if (existingAdmin) {
         return res.status(400).json({
-          message: "An admin already exists for this company",
+          message: "Only one admin account is allowed. Please contact support if you need assistance.",
         });
       }
     }
