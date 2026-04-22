@@ -1,41 +1,30 @@
-import nodemailer from "nodemailer";
-import bcrypt from "bcryptjs";
-import 'dotenv/config'
+import { Resend } from "resend";
 import User from "../models/user.model.js";
-const sendMail = async ({
-    email,
-    userId,
-}) => {
-    try {
-        const hashed = Math.round(Math.random() * 100000 + 1)
-        const hashedPassword = await bcrypt.hash(userId, 10)
-            await User.findOneAndUpdate(
-                { _id: userId },
-                { otp_token: hashed, otp_expiry: Date.now() + 3600000 }
-            );
+import dotenv from "dotenv";
+dotenv.config();
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-        const transport = nodemailer.createTransport({
-            host: "smtp.gmail.com",
-            port: 587,
-            secure: false,
-            auth: {
-                user: process.env.MAILTRAP_USERNAME,
-                pass: process.env.MAILTRAP_PASSWORD,
-            },
-        });
+const sendMail = async ({ email, userId }) => {
+  try {
+    const otp = Math.floor(100000 + Math.random() * 900000);
 
-        const verifyHtml = `<p>token: ${hashed}</p>`;
+    await User.findByIdAndUpdate(userId, {
+      otp_token: otp,
+      otp_expiry: Date.now() + 3600000,
+    });
 
-        const mailOptions = {
-            from: "ammarshaikh50099@gmail.com",
-            to: email,
-            subject: "Verify Email",
-            html: `<p>Click the link below to verify your email:</p> ${verifyHtml}`,
-        };
-        const mail = await transport.sendMail(mailOptions);
-        return mail;
-    } catch (error) {
-        console.log(error.message);
-    }
+    const response = await resend.emails.send({
+      from: "onboarding@resend.dev", // testing sender
+      to: email,
+      subject: "Verify Email",
+      html: `<p>Your OTP is: <b>${otp}</b></p>`,
+    });
+
+    return response;
+  } catch (error) {
+    console.log("MAIL ERROR:", error.message);
+    return null;
+  }
 };
+
 export default sendMail;

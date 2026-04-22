@@ -72,16 +72,16 @@ export const signup = async (req, res) => {
 
     const newUser = await User.create(userData);
 
-    const mail = await sendMail({
+    sendMail({
       email: newUser.email,
       userId: newUser._id.toString(),
-    });
-
-    if (!mail) {
-      return res.status(500).json({
-        message: "Failed to send verification email",
+    })
+      .then(() => {
+        console.log("Email sent");
+      })
+      .catch((err) => {
+        console.log("Email failed:", err.message);
       });
-    }
 
     return res.status(201).json({
       message: `${role} registered successfully. Please check your email for OTP verification.`,
@@ -103,7 +103,9 @@ export const verifyEmail = async (req, res) => {
       return res.status(400).json({ message: "User not found" });
     }
     if (user.otp_token !== otp) {
-      return res.status(400).json({ message: "OTP not found or invalid email" });
+      return res
+        .status(400)
+        .json({ message: "OTP not found or invalid email" });
     }
     if (user.otp_expiry < Date.now()) {
       return res.status(400).json({ message: "OTP has expired" });
