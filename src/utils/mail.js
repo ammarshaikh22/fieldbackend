@@ -1,37 +1,41 @@
 import nodemailer from "nodemailer";
 import bcrypt from "bcryptjs";
+import 'dotenv/config'
 import User from "../models/user.model.js";
-import "dotenv/config";
+const sendMail = async ({
+    email,
+    userId,
+}) => {
+    try {
+        const hashed = Math.round(Math.random() * 100000 + 1)
+        const hashedPassword = await bcrypt.hash(userId, 10)
+            await User.findOneAndUpdate(
+                { _id: userId },
+                { verifyToken: hashed, verifyTokenExpiry: Date.now() + 3600000 }
+            );
 
-export const sendMail = async ({ email, userId }) => {
-  try {
-    const hashed = Math.round(Math.random() * 100000 + 1);
+        const transport = nodemailer.createTransport({
+            host: "smtp.gmail.com",
+            port: 587,
+            secure: false,
+            auth: {
+                user: process.env.MAILTRAP_USERNAME,
+                pass: process.env.MAILTRAP_PASSWORD,
+            },
+        });
 
-    await User.findByIdAndUpdate(userId, {
-      otp_token: hashed,
-      otp_expiry: Date.now() + 3600000,
-    });
+        const verifyHtml = `<p>token: ${hashed}</p>`;
 
-    const transport = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: process.env.NODE_ENV === "production" ? 465 : 587,
-      secure: process.env.NODE_ENV === "production" ? true : false,
-      auth: {
-        user: process.env.MAILTRAP_USERNAME,
-        pass: process.env.MAILTRAP_PASSWORD,
-      },
-    });
-
-    await transport.sendMail({
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Verify Email",
-      html: `<p>OTP: ${hashed}</p>`,
-    });
-
-    return true;
-  } catch (error) {
-    console.log("MAIL ERROR:", error.message);
-    return false;
-  }
+        const mailOptions = {
+            from: "ammarshaikh50099@gmail.com",
+            to: email,
+            subject: "Verify Email",
+            html: `<p>Click the link below to verify your email:</p> ${verifyHtml}`,
+        };
+        const mail = await transport.sendMail(mailOptions);
+        return mail;
+    } catch (error) {
+        console.log(error.message);
+    }
 };
+export default sendMail;
