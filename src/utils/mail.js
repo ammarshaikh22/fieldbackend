@@ -22,7 +22,7 @@ const sendMail = async ({ email, userId }) => {
       },
     });
 
-    const verifyHtml = `<p><p>token: ${hashed}</p>`;
+    const verifyHtml = `<p>token: ${hashed}</p>`;
 
     const mailOptions = {
       from: "ammarshaikh50099@gmail.com",
