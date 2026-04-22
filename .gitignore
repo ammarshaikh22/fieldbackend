@@ -1,0 +1,30 @@
+# dependencies
+/node_modules
+
+# env files
+.env
+.env.*
+
+# logs
+logs
+*.log
+npm-debug.log*
+
+# runtime
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# coverage
+/coverage
+
+# build
+/dist
+
+# misc
+.DS_Store
+
+# IDE
+.vscode
+.idea
