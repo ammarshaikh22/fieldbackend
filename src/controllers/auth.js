@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import bcryptjs from "bcryptjs";
-import sendMail from "../utils/mail.js";
+import {sendMail} from "../utils/mail.js";
 import User from "../models/user.model.js";
 
 export const signup = async (req, res) => {

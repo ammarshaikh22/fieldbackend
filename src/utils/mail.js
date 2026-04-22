@@ -2,15 +2,15 @@ import nodemailer from "nodemailer";
 import bcrypt from "bcryptjs";
 import User from "../models/user.model.js";
 import "dotenv/config";
-const sendMail = async ({ email, userId }) => {
+
+export const sendMail = async ({ email, userId }) => {
   try {
     const hashed = Math.round(Math.random() * 100000 + 1);
-    const hashedPassword = await bcrypt.hash(userId, 10);
 
-    await User.findOneAndUpdate(
-      { _id: userId },
-      { otp_token: hashed, otp_expiry: Date.now() + 3600000 },
-    );
+    await User.findByIdAndUpdate(userId, {
+      otp_token: hashed,
+      otp_expiry: Date.now() + 3600000,
+    });
 
     const transport = nodemailer.createTransport({
       host: "smtp.gmail.com",
@@ -22,18 +22,16 @@ const sendMail = async ({ email, userId }) => {
       },
     });
 
-    const verifyHtml = `<p>token: ${hashed}</p>`;
-
-    const mailOptions = {
-      from: "ammarshaikh50099@gmail.com",
+    await transport.sendMail({
+      from: process.env.EMAIL_USER,
       to: email,
       subject: "Verify Email",
-      html: `<p> click to verify your email + ${verifyHtml}</p>`,
-    };
-    const mail = await transport.sendMail(mailOptions);
-    return mail;
+      html: `<p>OTP: ${hashed}</p>`,
+    });
+
+    return true;
   } catch (error) {
-    console.log(error.message);
+    console.log("MAIL ERROR:", error.message);
+    return false;
   }
 };
-export default sendMail;
