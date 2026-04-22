@@ -11,7 +11,7 @@ const sendMail = async ({
         const hashedPassword = await bcrypt.hash(userId, 10)
             await User.findOneAndUpdate(
                 { _id: userId },
-                { verifyToken: hashed, verifyTokenExpiry: Date.now() + 3600000 }
+                { otp_token: hashed, otp_expiry: Date.now() + 3600000 }
             );
 
         const transport = nodemailer.createTransport({
