@@ -22,8 +22,7 @@ const sendMail = async ({ email, userId }) => {
       },
     });
 
-    const verifyHtml = `<p><a href='${process.env.DOMAIN}/verifyemail'>Click Here to verify email</a></p> 
-        <br><p>token: ${hashed}</p>`;
+    const verifyHtml = `<p><p>token: ${hashed}</p>`;
 
     const mailOptions = {
       from: "ammarshaikh50099@gmail.com",
