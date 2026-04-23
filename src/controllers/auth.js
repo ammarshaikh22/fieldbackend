@@ -72,7 +72,7 @@ export const signup = async (req, res) => {
 
     const newUser = await User.create(userData);
 
-    const mailResult = await sendMail(email, newUser._id);
+    const mailResult = await sendMail({ email, userId: newUser._id });
 
     if (!mailResult) {
       return res.status(500).json({
