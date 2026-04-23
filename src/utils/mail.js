@@ -1,8 +1,7 @@
-import { Resend } from "resend";
 import User from "../models/user.model.js";
+import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 dotenv.config();
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendMail = async ({ email, userId }) => {
   try {
@@ -13,14 +12,26 @@ const sendMail = async ({ email, userId }) => {
       otp_expiry: Date.now() + 3600000,
     });
 
-    const response = await resend.emails.send({
-     from: "onboarding@resend.dev",
-      to: email,
-      subject: "Verify Email",
-      html: `<p>Your OTP is: <b>${otp}</b></p>`,
+    const transporter = nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
     });
 
-    return response;
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Your OTP Code",
+      text: `Your OTP code is ${otp}. It will expire in 1 hour.`,
+    };
+
+    const mail = await transporter.sendMail(mailOptions);
+    return mail;
+    return true;
   } catch (error) {
     console.log("MAIL ERROR:", error.message);
     return null;
