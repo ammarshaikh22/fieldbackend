@@ -14,7 +14,7 @@ const sendMail = async ({ email, userId }) => {
     });
 
     const response = await resend.emails.send({
-     from: "noreply@ammar.fieldops.com",
+     from: "onboarding@resend.dev",
       to: email,
       subject: "Verify Email",
       html: `<p>Your OTP is: <b>${otp}</b></p>`,
