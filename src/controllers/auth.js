@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import bcryptjs from "bcryptjs";
-import User from "../models/user.model.js";
 import sendMail from "../utils/mail.js";
+import User from "../models/user.model.js";
 
 export const signup = async (req, res) => {
   try {
@@ -27,13 +27,12 @@ export const signup = async (req, res) => {
       }
 
       const existingAdmin = await User.findOne({
-        role: "admin",
+        role: "admin"
       });
 
       if (existingAdmin) {
         return res.status(400).json({
-          message:
-            "Only one admin account is allowed. Please contact support if you need assistance.",
+          message: "Only one admin account is allowed. Please contact support if you need assistance.",
         });
       }
     }
@@ -71,13 +70,17 @@ export const signup = async (req, res) => {
     }
 
     const newUser = await User.create(userData);
-    const mailResult = await sendMail(email, newUser._id);
 
-    if (!mailResult) {
-      return res.status(500).json({
-        message: "Failed to send verification email",
+    sendMail({
+      email: newUser.email,
+      userId: newUser._id.toString(),
+    })
+      .then(() => {
+        console.log("Email sent");
+      })
+      .catch((err) => {
+        console.log("Email failed:", err.message);
       });
-    }
 
     return res.status(201).json({
       message: `${role} registered successfully. Please check your email for OTP verification.`,
